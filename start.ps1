@@ -1,4 +1,4 @@
-# Starts LinkeSearch locally: backend (127.0.0.1:8000) and frontend (localhost:3000).
+﻿# Starts LinkeSearch locally: backend (127.0.0.1:8000) and frontend (localhost:3000).
 # Usage: powershell -ExecutionPolicy Bypass -File .\start.ps1
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot

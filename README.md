@@ -23,6 +23,14 @@ O navegador usado é o **Google Chrome instalado**, com um **perfil separado** e
 powershell -ExecutionPolicy Bypass -File .\start.ps1
 ```
 
+Para desligar tudo (backend, frontend e o Chrome em segundo plano), de qualquer terminal:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\stop.ps1
+```
+
+Atalhos de **dois cliques** no Explorer: `start.cmd` liga (deixe a janela aberta enquanto usa) e `stop.cmd` desliga. `stop.ps1 -List` só mostra o que seria encerrado. O script só mexe em processos desta pasta do projeto: o seu Chrome normal e outros programas não são afetados.
+
 1. **Login**: na primeira vez, "Conectar ao LinkedIn" abre o Chrome para você logar (Google SSO funciona). Depois disso a sessão fica salva e a tela segue direto.
 2. **Comandos**:
    - **Buscar NOVAS vagas**: busca as vagas das últimas 24h. Pode ser cancelada no meio, e o que já foi lido fica gravado. Se a última busca foi há mais de 24h, sugere uma janela maior, em passos de 12h (26h → 36h).
