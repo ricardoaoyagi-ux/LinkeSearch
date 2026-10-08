@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4f2ee;
+  --foreground: #1f2937;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Spinning hourglass for the loading overlay */
+@keyframes hourglass-spin {
+  0%,
+  40% {
+    transform: rotate(0deg);
+  }
+  60%,
+  100% {
+    transform: rotate(180deg);
+  }
+}
+.hourglass {
+  display: inline-block;
+  animation: hourglass-spin 1.4s ease-in-out infinite;
+}
+
+/* Job description coming from LinkedIn (already sanitized) */
+.job-about {
+  line-height: 1.6;
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+.job-about ul,
+.job-about ol {
+  margin: 0.5rem 0 0.5rem 1.5rem;
+}
+.job-about ul {
+  list-style: disc;
+}
+.job-about ol {
+  list-style: decimal;
+}
+.job-about li {
+  margin: 0.15rem 0;
+}
+.job-about strong,
+.job-about b {
+  font-weight: 600;
+}
