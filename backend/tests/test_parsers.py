@@ -104,3 +104,18 @@ def test_rsc_to_html():
         ]
     )
     assert rsc_to_html(stream) == "<strong>Hello</strong><br><ul><li>First</li><li>Second &lt;b&gt;</li></ul>$5 off"
+
+
+def test_rsc_text_row_with_newlines_followed_by_glued_row():
+    # Large strings arrive as `<id>:T<hex byte length>,<text>`; the text may contain newlines
+    # and the next row starts right after it, without a separator.
+    nl = chr(10)
+    text = "Descrição longa" + nl + "segunda linha" + nl + "terceira"
+    size = format(len(text.encode("utf-8")), "x")
+    stream = (
+        "1:I[\"x\",[],\"default\"]" + nl
+        + "5:T" + size + "," + text
+        + "0:[\"$\",\"$L1\",null,{\"children\":[\"$\",\"p\",null,{\"children\":\"$5\"}]}]" + nl
+    )
+    assert rsc_to_html(stream) == "<p>" + text + "</p>"
+    assert rsc_to_html(stream.encode("utf-8")) == "<p>" + text + "</p>"

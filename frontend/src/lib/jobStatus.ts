@@ -6,8 +6,8 @@ export const isViewed = (job: Job) => job.li_viewed || job.local_viewed_at !== n
 /** Apply clicked here, or marked "Applied" by LinkedIn. */
 export const isApplied = (job: Job) => job.li_applied || job.apply_clicked_at !== null;
 
-/** About + Apply link already fetched from LinkedIn (they are loaded on first open). */
-export const hasDetail = (job: Job) => job.about_html !== null && job.apply_url !== null;
+/** About + Apply link already fetched from LinkedIn (loaded on open; an empty About is fetched again). */
+export const hasDetail = (job: Job) => Boolean(job.about_html) && job.apply_url !== null;
 
 export function hoursSince(iso: string | null, now = Date.now()): number | null {
   if (!iso) return null;

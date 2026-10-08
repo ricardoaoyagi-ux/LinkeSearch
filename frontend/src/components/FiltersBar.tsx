@@ -1,6 +1,6 @@
 "use client";
 
-import { DEFAULT_FILTERS, POSTED_OPTIONS, type JobFilters, type TriState } from "@/lib/filters";
+import { DEFAULT_FILTERS, POSTED_OPTIONS, type JobFilters, type SearchField, type TriState } from "@/lib/filters";
 import { Button } from "./Button";
 
 interface Props {
@@ -11,6 +11,11 @@ interface Props {
   shown: number;
   total: number;
 }
+
+const SEARCH_FIELDS: { value: SearchField; label: string }[] = [
+  { value: "title", label: "Título" },
+  { value: "company", label: "Empresa" },
+];
 
 const TRI_OPTIONS: { value: TriState; label: string }[] = [
   { value: "all", label: "Todas" },
@@ -42,16 +47,35 @@ export function FiltersBar({ draft, onChange, onApply, onReset, shown, total }: 
         onApply();
       }}
     >
-      <label className="flex flex-col text-xs font-medium text-slate-600">
-        Título da vaga
-        <input
-          type="search"
-          value={draft.title}
-          onChange={(e) => onChange({ ...draft, title: e.target.value })}
-          placeholder="ex.: tech lead"
-          className="mt-1 w-48 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800"
-        />
-      </label>
+      <div className="flex flex-col text-xs font-medium text-slate-600">
+        <span>Buscar em</span>
+        <div className="mt-1 flex">
+          <div className="flex overflow-hidden rounded-l-md border border-r-0 border-slate-300" role="radiogroup">
+            {SEARCH_FIELDS.map((f) => (
+              <button
+                key={f.value}
+                type="button"
+                role="radio"
+                aria-checked={draft.searchIn === f.value}
+                onClick={() => onChange({ ...draft, searchIn: f.value })}
+                className={`px-2.5 py-1.5 text-sm ${
+                  draft.searchIn === f.value ? "bg-[#0a66c2] text-white" : "bg-white text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <input
+            type="search"
+            aria-label={`Buscar no ${draft.searchIn === "company" ? "nome da empresa" : "título da vaga"}`}
+            value={draft.search}
+            onChange={(e) => onChange({ ...draft, search: e.target.value })}
+            placeholder={draft.searchIn === "company" ? "ex.: nfq" : "ex.: tech lead"}
+            className="w-44 rounded-r-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800"
+          />
+        </div>
+      </div>
       <Select label="Visualizada" value={draft.viewed} onChange={(v) => onChange({ ...draft, viewed: v as TriState })}>
         {TRI_OPTIONS.map((o) => (
           <option key={o.value} value={o.value}>

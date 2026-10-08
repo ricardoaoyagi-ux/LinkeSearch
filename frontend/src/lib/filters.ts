@@ -2,6 +2,7 @@ import type { Job } from "@/types/job";
 import { hoursSince, isApplied, isViewed } from "./jobStatus";
 
 export type TriState = "all" | "yes" | "no";
+export type SearchField = "title" | "company";
 
 export interface JobFilters {
   viewed: TriState;
@@ -9,8 +10,9 @@ export interface JobFilters {
   saved: TriState;
   postedWithinHours: number | null;
   hideIgnored: boolean;
-  /** Free text matched anywhere in the title (like SQL %text%), ignoring case and accents */
-  title: string;
+  /** Free text matched anywhere in the chosen field (like SQL %text%), ignoring case and accents */
+  search: string;
+  searchIn: SearchField;
 }
 
 export const DEFAULT_FILTERS: JobFilters = {
@@ -19,7 +21,8 @@ export const DEFAULT_FILTERS: JobFilters = {
   saved: "all",
   postedWithinHours: null,
   hideIgnored: true,
-  title: "",
+  search: "",
+  searchIn: "title",
 };
 
 /** "Líder Técnico" -> "lider tecnico" */
@@ -39,10 +42,10 @@ export const POSTED_OPTIONS: { label: string; hours: number | null }[] = [
 const matchTri = (state: TriState, value: boolean) => state === "all" || (state === "yes") === value;
 
 export function applyFilters(jobs: Job[], filters: JobFilters, now = Date.now()): Job[] {
-  const title = normalizeText(filters.title);
+  const search = normalizeText(filters.search);
   return jobs.filter((job) => {
     if (filters.hideIgnored && job.ignored_at !== null) return false;
-    if (title && !normalizeText(job.title).includes(title)) return false;
+    if (search && !normalizeText(filters.searchIn === "company" ? job.company : job.title).includes(search)) return false;
     if (!matchTri(filters.viewed, isViewed(job))) return false;
     if (!matchTri(filters.applied, isApplied(job))) return false;
     if (!matchTri(filters.saved, job.saved_at !== null)) return false;

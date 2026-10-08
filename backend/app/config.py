@@ -37,6 +37,10 @@ class Settings(BaseSettings):
         return self.data_dir / "memory"
 
     @property
+    def debug_dir(self) -> Path:
+        return self.data_dir / "debug"
+
+    @property
     def state_file(self) -> Path:
         return self.data_dir / "state.json"
 

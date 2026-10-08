@@ -16,19 +16,19 @@ _DETAIL_FIELDS = ("about_html", "apply_url", "is_easy_apply", "posted_at", "post
 
 
 def has_detail(job: Job) -> bool:
-    return job.about_html is not None and job.apply_url is not None
+    # An empty About ("") counts as missing: it is fetched again the next time the job is opened
+    return bool(job.about_html) and job.apply_url is not None
 
 
 def fetch_and_store(settings: Settings, repo: JobRepository, job_id: str) -> Job | None:
     job = repo.get(job_id)
     if job is None or has_detail(job):
         return job
-    client = LinkedInClient(browser_manager.context(settings, headless=settings.headless))
+    client = LinkedInClient(browser_manager.context(settings, headless=settings.headless), settings.debug_dir)
     detail = client.fetch_job_page(job_id)
     detail["about_html"] = client.fetch_about_html(job_id)
     filled = parsers.apply_detail(job, detail, datetime.now().astimezone())
     fields = {f: getattr(filled, f) for f in _DETAIL_FIELDS}
-    fields["about_html"] = fields["about_html"] or ""  # nothing came back: do not retry on every open
     # Re-read: local marks (viewed/apply) may have changed while LinkedIn was being queried
     current = repo.get(job_id) or job
     updated = current.model_copy(update=fields)

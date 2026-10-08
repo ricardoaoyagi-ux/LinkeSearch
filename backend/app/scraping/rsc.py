@@ -9,7 +9,8 @@ import html
 import json
 import re
 
-_ROW_RE = re.compile(r"^([0-9a-f]+):(.*)$")
+_HEX_RE = re.compile(r"^[0-9a-f]+$")
+_NL = bytes([10])  # newline separating rows
 _REF_RE = re.compile(r"^\$[LF@]?([0-9a-f]+)$")
 _ALLOWED_TAGS = {"p", "br", "ul", "ol", "li", "strong", "b", "em", "i", "u", "h3", "h4", "div"}
 _DROPPED_TAGS = {"button", "svg", "img", "script", "style", "figure", "a", "input"}
@@ -18,18 +19,43 @@ _HEADING_TEXT = "About the job"
 _MAX_DEPTH = 200
 
 
-def parse_rows(stream: str) -> dict[str, object]:
+def parse_rows(stream: str | bytes) -> dict[str, object]:
+    """Splits the flight stream into rows.
+
+    Most rows are `<id>:<json>` lines, but large strings come as text rows `<id>:T<hex byte length>,<text>`:
+    the text may contain newlines and the next row follows right after it, so text rows must be
+    read by their declared UTF-8 byte length, never line by line.
+    """
+    data = stream.encode("utf-8") if isinstance(stream, str) else stream
     rows: dict[str, object] = {}
-    for line in stream.splitlines():
-        match = _ROW_RE.match(line)
-        if not match:
+    i, size = 0, len(data)
+    while i < size:
+        colon = data.find(b":", i)
+        newline = data.find(_NL, i)
+        if colon == -1:
+            break
+        key = data[i:colon].decode("ascii", "replace").strip()
+        if (newline != -1 and newline < colon) or not _HEX_RE.match(key):
+            i = colon + 1 if newline == -1 else newline + 1  # not a row start: skip the line
             continue
-        key, raw = match.groups()
+        body = colon + 1
+        if data[body : body + 1] == b"T":
+            comma = data.find(b",", body)
+            try:
+                length = int(data[body + 1 : comma], 16)
+            except ValueError:
+                length = None
+            if comma != -1 and length is not None:
+                text_end = comma + 1 + length
+                rows[key] = data[comma + 1 : text_end].decode("utf-8", "replace")
+                i = text_end + 1 if data[text_end : text_end + 1] == _NL else text_end
+                continue
+        end = data.find(_NL, body)
+        end = size if end == -1 else end
+        raw = data[body:end].decode("utf-8", "replace")
+        i = end + 1
         if raw.startswith("I["):  # client component import
             rows[key] = {"$import": True}
-            continue
-        if raw.startswith("T"):  # text chunk: T<hexlen>,<text>
-            rows[key] = raw.split(",", 1)[1] if "," in raw else ""
             continue
         try:
             rows[key] = json.loads(raw)
@@ -101,7 +127,7 @@ def _tidy(markup: str) -> str:
     return markup.strip()
 
 
-def rsc_to_html(stream: str) -> str:
+def rsc_to_html(stream: str | bytes) -> str:
     rows = parse_rows(stream)
     if "0" not in rows:
         return ""

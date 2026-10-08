@@ -5,6 +5,8 @@ same cookies (no page JS runs, so LinkedIn does not record a "Viewed" for them).
 """
 
 import json
+import logging
+from pathlib import Path
 from urllib.parse import urlencode
 
 from playwright.sync_api import BrowserContext, Page
@@ -12,6 +14,8 @@ from playwright.sync_api import TimeoutError as PlaywrightTimeout
 
 from app.scraping import dom_scripts, parsers
 from app.scraping.rsc import rsc_to_html
+
+logger = logging.getLogger("uvicorn.error")
 
 BASE = "https://www.linkedin.com"
 SEARCH_URL = f"{BASE}/jobs/search-results/"
@@ -35,8 +39,9 @@ def build_search_url(keywords: str, geo_id: str, range_hours: int, start: int = 
 
 
 class LinkedInClient:
-    def __init__(self, ctx: BrowserContext):
+    def __init__(self, ctx: BrowserContext, debug_dir: Path | None = None):
         self.ctx = ctx
+        self.debug_dir = debug_dir
         self.page: Page = ctx.pages[0] if ctx.pages else ctx.new_page()
 
     def _goto(self, url: str) -> None:
@@ -101,6 +106,18 @@ class LinkedInClient:
             },
             fail_on_status_code=False,
         )
-        if resp.status != 200:
-            return ""
-        return rsc_to_html(resp.text())
+        raw = resp.body()
+        about = rsc_to_html(raw) if resp.status == 200 else ""
+        if not about:
+            self._keep_debug_dump(job_id, resp.status, raw)
+        return about
+
+    def _keep_debug_dump(self, job_id: str, status: int, raw: bytes) -> None:
+        """Saves the raw About response that produced no text (.data/debug, never committed)."""
+        target = self.debug_dir / f"about_{job_id}.txt" if self.debug_dir else None
+        if target:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(raw)
+        logger.warning(
+            "Empty About for job %s (HTTP %s, %d bytes)%s", job_id, status, len(raw), f"; raw saved to {target}" if target else ""
+        )
