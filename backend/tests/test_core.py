@@ -44,7 +44,7 @@ def test_suggest_range(hours_ago, expected):
 
 @pytest.fixture
 def memory(tmp_path):
-    return MemoryService(Settings(data_dir=tmp_path))
+    return MemoryService(Settings(_env_file=None, data_dir=tmp_path))
 
 
 def _job(job_id, **kw):

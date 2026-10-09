@@ -38,6 +38,21 @@ Atalhos de **dois cliques** no Explorer: `start.cmd` liga (deixe a janela aberta
    - **Limpar vagas**: escolhe uma semana e exclui o arquivo, com confirmação.
 3. **Vagas**: filtros por Visualizada, Apply clicado e data de postagem (2/4/6/12/24h), mais o filtro **"Não listar vagas ignoradas"**, que vem marcado. Os botões são Aplicar e Reset. **🚫 Ignorar vaga** esconde a vaga sem apagá-la do arquivo. Só você marca isso: vagas vindas do LinkedIn (novas, atualizadas ou repostadas) nunca chegam ignoradas, e a sua marcação é mantida nas buscas seguintes. Para desfazer, desmarque o filtro e use "Voltar a listar". Abrir uma vaga marca como visualizada aqui. Clicar no APPLY abre o link externo da empresa e registra o clique.
 
+## Triagem por aderência (ChatGPT)
+
+Na tela principal, em **🧮 Triagem por aderência**:
+
+1. **Preparar triagem**: escolha a semana. O sistema busca a descrição (About) das vagas **novas** (sem salva, ignorada, apply ou triagem anterior) e gera, em `.data/triage/<semana>/`:
+   - `triagem_<semana>_00_LEIA_PRIMEIRO_prompt.md`: as instruções para colar como 1ª mensagem no ChatGPT;
+   - `triagem_<semana>_lote_NN.json`: lotes de até 25 vagas, com a descrição em texto.
+   Baixe tudo pela própria janela (arquivo por arquivo ou `.zip`).
+2. No ChatGPT, anexe o seu **arquivo mestre de competências**, envie o prompt e depois um lote por mensagem. O ChatGPT mantém um arquivo `resultado_triagem_<semana>.json` com `job_id`, `aderencia` (0–100), `salario_min/ideal/max` e `resumo`.
+3. **Importar resultado**: envie ou cole esse JSON (todas as vagas de uma vez ou um lote por vez; reimportar só atualiza). As vagas com **aderência ≤ 59%** são ignoradas automaticamente; as demais ficam como estão, para você decidir. As vagas que **você** já tinha salvo, ignorado ou aplicado recebem a nota, mas mantêm a sua marcação. O relatório aponta IDs não encontrados e vagas dos lotes que ficaram sem nota.
+
+Na consulta de vagas aparecem o selo de aderência, a pretensão salarial (mín/ideal/máx) com o resumo, o selo "IGNORADA (triagem)" e o filtro **Triada**.
+
+**Ritmo para não incomodar o LinkedIn:** as descrições são buscadas com 4–9 s entre vagas, uma pausa de 1–2 min a cada 25 e no máximo 150 por execução. Rodando de novo, o sistema continua de onde parou. Se o LinkedIn limitar (HTTP 429/403/999 ou pedido de login), a triagem para na hora e mantém o que já buscou. Evite rodar a triagem logo depois de uma busca. Ajustes estão no `backend/.env` (veja o `.env.example`). Para personalizar o prompt (CLT/PJ, moeda, critérios), copie `backend/app/triage/prompt_template.md` para `.data/triage/prompt_template.md` e edite essa cópia, que fica fora do git.
+
 ## Memória semanal
 
 `.data/memory/vagas_AAAAMMDD.db`: um arquivo por semana, com a data do **domingo**. No domingo a busca cria o arquivo novo; nos demais dias, incrementa o do último domingo. Vagas repetidas não são duplicadas, nem entre semanas. Se o status no LinkedIn mudar (Viewed/Applied), a "data em que foi localizada" é atualizada. `.data/state.json` guarda a última execução.

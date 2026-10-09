@@ -7,6 +7,7 @@ from playwright.sync_api import Error as PlaywrightError
 from app.config import get_settings
 from app.repositories.job_repository import JobRepository
 from app.scraping.browser import BrowserUnavailableError, browser_manager, run_in_browser_thread
+from app.scraping.linkedin_client import LinkedInBlockedError, SessionExpiredError
 from app.services.memory_service import MemoryService
 
 T = TypeVar("T")
@@ -34,7 +35,7 @@ async def browser_call(fn: Callable[..., T], *args) -> T:
     """
     try:
         return await run_in_browser_thread(fn, *args)
-    except BrowserUnavailableError as exc:
+    except (BrowserUnavailableError, LinkedInBlockedError, SessionExpiredError) as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except PlaywrightError as exc:
         await run_in_browser_thread(browser_manager.close)

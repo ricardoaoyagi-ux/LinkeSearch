@@ -33,3 +33,12 @@ class Job(ScrapedJob):
     # Set only by the user; never filled from LinkedIn data and kept across scans
     ignored_at: datetime | None = None
     saved_at: datetime | None = None
+    # Triage results imported from the AI (kept across scans)
+    triage_score: int | None = None
+    salary_min: int | None = None
+    salary_ideal: int | None = None
+    salary_max: int | None = None
+    salary_currency: str | None = None
+    triage_summary: str | None = None
+    triaged_at: datetime | None = None
+    triage_action: str | None = None  # "ignored" when the import (not the user) ignored the job

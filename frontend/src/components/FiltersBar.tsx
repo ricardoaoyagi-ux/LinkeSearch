@@ -23,7 +23,17 @@ const TRI_OPTIONS: { value: TriState; label: string }[] = [
   { value: "no", label: "Não" },
 ];
 
-function Select({ label, value, onChange, children }: { label: string; value: string; onChange: (v: string) => void; children: React.ReactNode }) {
+function Select({
+  label,
+  value,
+  onChange,
+  children,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  children: React.ReactNode;
+}) {
   return (
     <label className="flex flex-col text-xs font-medium text-slate-600">
       {label}
@@ -71,7 +81,7 @@ export function FiltersBar({ draft, onChange, onApply, onReset, shown, total }: 
             aria-label={`Buscar no ${draft.searchIn === "company" ? "nome da empresa" : "título da vaga"}`}
             value={draft.search}
             onChange={(e) => onChange({ ...draft, search: e.target.value })}
-            placeholder={draft.searchIn === "company" ? "ex.: nfq" : "ex.: tech lead"}
+            placeholder={draft.searchIn === "company" ? "ex.: acme" : "ex.: tech lead"}
             className="w-44 rounded-r-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800"
           />
         </div>
@@ -83,7 +93,11 @@ export function FiltersBar({ draft, onChange, onApply, onReset, shown, total }: 
           </option>
         ))}
       </Select>
-      <Select label="Apply clicado" value={draft.applied} onChange={(v) => onChange({ ...draft, applied: v as TriState })}>
+      <Select
+        label="Apply clicado"
+        value={draft.applied}
+        onChange={(v) => onChange({ ...draft, applied: v as TriState })}
+      >
         {TRI_OPTIONS.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
@@ -91,6 +105,13 @@ export function FiltersBar({ draft, onChange, onApply, onReset, shown, total }: 
         ))}
       </Select>
       <Select label="Salva" value={draft.saved} onChange={(v) => onChange({ ...draft, saved: v as TriState })}>
+        {TRI_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </Select>
+      <Select label="Triada" value={draft.triaged} onChange={(v) => onChange({ ...draft, triaged: v as TriState })}>
         {TRI_OPTIONS.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
@@ -118,7 +139,12 @@ export function FiltersBar({ draft, onChange, onApply, onReset, shown, total }: 
         Não listar vagas ignoradas
       </label>
       <Button type="submit">Aplicar</Button>
-      <Button type="button" variant="secondary" onClick={onReset} disabled={JSON.stringify(draft) === JSON.stringify(DEFAULT_FILTERS) && shown === total}>
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={onReset}
+        disabled={JSON.stringify(draft) === JSON.stringify(DEFAULT_FILTERS) && shown === total}
+      >
         Reset
       </Button>
       <span className="ml-auto text-sm text-slate-500">

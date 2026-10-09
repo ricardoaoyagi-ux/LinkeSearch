@@ -13,6 +13,7 @@ class TaskStatus(str, Enum):
 
 class TaskState(BaseModel):
     task_id: str
+    kind: str = "scan"  # "scan" (Buscar NOVAS vagas) or "triage" (Preparar triagem)
     status: TaskStatus = TaskStatus.RUNNING
     message: str = "Iniciando..."
     pages_read: int = 0

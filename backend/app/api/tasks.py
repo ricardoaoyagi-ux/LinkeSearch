@@ -16,6 +16,8 @@ class ScanRequest(BaseModel):
 @router.post("/scan", response_model=TaskState)
 def start_scan(req: ScanRequest) -> TaskState:
     if running := task_manager.running():
+        if running.kind != "scan":
+            raise HTTPException(status_code=409, detail="Há uma triagem em andamento. Aguarde terminar.")
         return running
     settings = get_settings()
     hours = min(req.range_hours, settings.max_range_hours)

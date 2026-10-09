@@ -61,9 +61,9 @@ class TaskManager:
         with self._lock:
             self._tasks[task_id] = self._tasks[task_id].model_copy(update=fields)
 
-    def start(self, work: Callable[[Progress], dict]) -> TaskState:
+    def start(self, work: Callable[[Progress], dict], kind: str = "scan") -> TaskState:
         """`work` runs on the browser thread, receives a Progress callback and returns final fields."""
-        task = TaskState(task_id=uuid.uuid4().hex, started_at=datetime.now().astimezone())
+        task = TaskState(task_id=uuid.uuid4().hex, kind=kind, started_at=datetime.now().astimezone())
         with self._lock:
             self._tasks[task.task_id] = task
 

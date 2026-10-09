@@ -1,4 +1,4 @@
-import type { Job, StorageStatus, TaskState } from "@/types/job";
+import type { Job, StorageStatus, TaskState, TriageImportReport, TriageStatus } from "@/types/job";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
 
@@ -55,4 +55,11 @@ export const api = {
   jobDetail: (week: string, jobId: string) => post<Job>(`/api/jobs/${week}/${jobId}/detail`),
   markViewed: (week: string, jobId: string) => post<Job>(`/api/jobs/${week}/${jobId}/viewed`),
   markApplyClick: (week: string, jobId: string) => post<Job>(`/api/jobs/${week}/${jobId}/apply-click`),
+
+  triageStatus: (week: string) => request<TriageStatus>(`/api/triage/${week}`),
+  triagePrepare: (week: string) => post<TaskState>(`/api/triage/${week}/prepare`),
+  triageImport: (text: string) => post<TriageImportReport>("/api/triage/import", { text }),
+  /** Direct download links (served with Content-Disposition: attachment) */
+  triageFileUrl: (week: string, name: string) => `${API_URL}/api/triage/${week}/files/${encodeURIComponent(name)}`,
+  triageZipUrl: (week: string) => `${API_URL}/api/triage/${week}/zip`,
 };

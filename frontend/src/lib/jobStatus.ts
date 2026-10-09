@@ -22,6 +22,16 @@ export function relativeTime(iso: string | null): string {
   return `há ${Math.floor(h / 24)} dias`;
 }
 
+/** 18000 -> "R$ 18.000" (currency from the triage, BRL by default) */
+export function formatMoney(value: number | null, currency: string | null): string {
+  if (value === null) return "—";
+  try {
+    return value.toLocaleString("pt-BR", { style: "currency", currency: currency || "BRL", maximumFractionDigits: 0 });
+  } catch {
+    return `${currency ?? ""} ${value.toLocaleString("pt-BR")}`.trim(); // unknown currency code
+  }
+}
+
 export function formatDateTime(iso: string | null): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });

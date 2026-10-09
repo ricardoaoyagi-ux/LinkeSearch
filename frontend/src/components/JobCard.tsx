@@ -1,5 +1,6 @@
 import type { Job } from "@/types/job";
 import { isApplied, isViewed, relativeTime } from "@/lib/jobStatus";
+import { ScoreBadge } from "./ScoreBadge";
 import { StatusBadge } from "./StatusBadge";
 
 interface Props {
@@ -21,7 +22,8 @@ export function JobCard({ job, selected, onSelect }: Props) {
         } ${job.ignored_at ? "opacity-50" : viewed && !selected ? "opacity-75" : ""}`}
       >
         <div className="mb-1 flex flex-wrap gap-1.5">
-          {job.ignored_at && <StatusBadge kind="ignored" />}
+          {job.triage_score !== null && <ScoreBadge score={job.triage_score} />}
+          {job.ignored_at && <StatusBadge kind={job.triage_action === "ignored" ? "ignoredByTriage" : "ignored"} />}
           {job.saved_at && <StatusBadge kind="saved" />}
           {applied && <StatusBadge kind="applied" />}
           <StatusBadge kind={viewed ? "viewed" : "notViewed"} />

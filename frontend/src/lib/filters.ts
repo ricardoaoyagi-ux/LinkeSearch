@@ -8,6 +8,7 @@ export interface JobFilters {
   viewed: TriState;
   applied: TriState;
   saved: TriState;
+  triaged: TriState;
   postedWithinHours: number | null;
   hideIgnored: boolean;
   /** Free text matched anywhere in the chosen field (like SQL %text%), ignoring case and accents */
@@ -19,6 +20,7 @@ export const DEFAULT_FILTERS: JobFilters = {
   viewed: "all",
   applied: "all",
   saved: "all",
+  triaged: "all",
   postedWithinHours: null,
   hideIgnored: true,
   search: "",
@@ -27,7 +29,11 @@ export const DEFAULT_FILTERS: JobFilters = {
 
 /** "Líder Técnico" -> "lider tecnico" */
 export function normalizeText(text: string): string {
-  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 }
 
 export const POSTED_OPTIONS: { label: string; hours: number | null }[] = [
@@ -45,10 +51,12 @@ export function applyFilters(jobs: Job[], filters: JobFilters, now = Date.now())
   const search = normalizeText(filters.search);
   return jobs.filter((job) => {
     if (filters.hideIgnored && job.ignored_at !== null) return false;
-    if (search && !normalizeText(filters.searchIn === "company" ? job.company : job.title).includes(search)) return false;
+    if (search && !normalizeText(filters.searchIn === "company" ? job.company : job.title).includes(search))
+      return false;
     if (!matchTri(filters.viewed, isViewed(job))) return false;
     if (!matchTri(filters.applied, isApplied(job))) return false;
     if (!matchTri(filters.saved, job.saved_at !== null)) return false;
+    if (!matchTri(filters.triaged, job.triaged_at !== null)) return false;
     if (filters.postedWithinHours !== null) {
       const h = hoursSince(job.posted_at, now);
       if (h === null || h > filters.postedWithinHours) return false;

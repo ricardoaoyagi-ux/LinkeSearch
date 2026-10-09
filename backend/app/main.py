@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, jobs, storage, tasks
+from app.api import auth, jobs, storage, tasks, triage
 from app.config import get_settings
 from app.scraping.browser import browser_manager, run_in_browser_thread
 
@@ -18,14 +18,14 @@ async def lifespan(_: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    app = FastAPI(title="LinkeSearch", version="1.0.0", lifespan=lifespan)
+    app = FastAPI(title="LinkeSearch", version="1.1.0", lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[settings.frontend_origin],
         allow_methods=["GET", "POST", "DELETE"],
         allow_headers=["Content-Type"],
     )
-    for module in (auth, storage, jobs, tasks):
+    for module in (auth, storage, jobs, tasks, triage):
         app.include_router(module.router)
     return app
 

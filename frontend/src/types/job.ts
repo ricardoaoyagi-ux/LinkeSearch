@@ -19,6 +19,15 @@ export interface Job {
   apply_clicked_at: string | null;
   ignored_at: string | null;
   saved_at: string | null;
+  triage_score: number | null;
+  salary_min: number | null;
+  salary_ideal: number | null;
+  salary_max: number | null;
+  salary_currency: string | null;
+  triage_summary: string | null;
+  triaged_at: string | null;
+  /** "ignored" when the triage import (not the user) ignored the job */
+  triage_action: string | null;
 }
 
 export interface MemoryFile {
@@ -40,6 +49,7 @@ export type TaskStatus = "running" | "done" | "cancelled" | "error";
 
 export interface TaskState {
   task_id: string;
+  kind: "scan" | "triage";
   status: TaskStatus;
   message: string;
   pages_read: number;
@@ -48,4 +58,32 @@ export interface TaskState {
   updated_jobs: number;
   week: string | null;
   error: string | null;
+}
+
+export interface TriageStatus {
+  week: string;
+  candidates: number;
+  without_about: number;
+  fetch_now: number;
+  max_per_run: number;
+  estimated_minutes: number;
+  threshold: number;
+  files: string[];
+  batch_jobs: number;
+  generated_at: string | null;
+}
+
+export interface TriageImportReport {
+  total_items: number;
+  imported: number;
+  ignored: number;
+  /** jobs from blocked companies (always ignored) */
+  blocked: number;
+  kept: number;
+  manual: number;
+  not_found: string[];
+  duplicates: string[];
+  invalid: { posicao: number; job_id?: string; motivo: string }[];
+  missing: { semana: string; lote: number; job_ids: string[] }[];
+  threshold: number;
 }

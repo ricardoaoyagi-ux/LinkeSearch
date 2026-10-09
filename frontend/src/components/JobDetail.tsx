@@ -3,7 +3,8 @@
 import DOMPurify from "dompurify";
 import { useMemo } from "react";
 import type { Job } from "@/types/job";
-import { formatDateTime, isApplied, isViewed, relativeTime, safeUrl } from "@/lib/jobStatus";
+import { formatDateTime, formatMoney, isApplied, isViewed, relativeTime, safeUrl } from "@/lib/jobStatus";
+import { ScoreBadge } from "./ScoreBadge";
 import { StatusBadge } from "./StatusBadge";
 
 interface Props {
@@ -47,11 +48,32 @@ export function JobDetail({ job, loading, error, actionError, onApply, onToggleI
             {job.location}
             {job.workplace_type && ` · ${job.workplace_type}`}
           </span>
-          {job.ignored_at && <StatusBadge kind="ignored" />}
+          {job.ignored_at && <StatusBadge kind={job.triage_action === "ignored" ? "ignoredByTriage" : "ignored"} />}
           {job.saved_at && <StatusBadge kind="saved" />}
           {applied && <StatusBadge kind="applied" />}
           <StatusBadge kind={isViewed(job) ? "viewed" : "notViewed"} />
         </div>
+
+        {job.triage_score !== null && (
+          <div className="mt-3 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <span className="flex items-center gap-1.5">
+                <span className="text-slate-500">Aderência:</span>
+                <ScoreBadge score={job.triage_score} />
+              </span>
+              <span>
+                <span className="text-slate-500">Pretensão (CLT):</span>{" "}
+                <span className="font-medium">
+                  {formatMoney(job.salary_min, job.salary_currency)} /{" "}
+                  {formatMoney(job.salary_ideal, job.salary_currency)} /{" "}
+                  {formatMoney(job.salary_max, job.salary_currency)}
+                </span>{" "}
+                <span className="text-xs text-slate-400">(mín / ideal / máx)</span>
+              </span>
+            </div>
+            {job.triage_summary && <p className="mt-1 text-slate-600">{job.triage_summary}</p>}
+          </div>
+        )}
 
         <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1 rounded-lg bg-slate-50 px-3 py-2 text-sm">
           <div className="flex gap-1.5">

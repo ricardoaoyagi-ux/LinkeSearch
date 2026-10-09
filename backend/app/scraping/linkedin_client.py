@@ -29,6 +29,16 @@ class SessionExpiredError(RuntimeError):
         super().__init__("Sessão do LinkedIn expirada. Deslogue e conecte novamente.")
 
 
+# Status codes LinkedIn uses when it throttles or blocks automated traffic (999 is LinkedIn-specific)
+BLOCKED_STATUSES = (403, 429, 999)
+
+
+class LinkedInBlockedError(RuntimeError):
+    def __init__(self, status: int):
+        super().__init__(f"O LinkedIn limitou as requisições (HTTP {status}). Pare por hoje e tente amanhã.")
+        self.status = status
+
+
 def build_search_url(keywords: str, geo_id: str, range_hours: int, start: int = 0) -> str:
     params = {"keywords": keywords, "f_TPR": f"r{range_hours * 3600}", "sortBy": "DD"}
     if geo_id:
@@ -106,6 +116,10 @@ class LinkedInClient:
             },
             fail_on_status_code=False,
         )
+        if resp.status in BLOCKED_STATUSES:
+            raise LinkedInBlockedError(resp.status)
+        if any(marker in resp.url for marker in _LOGGED_OUT_MARKERS):
+            raise SessionExpiredError()
         raw = resp.body()
         about = rsc_to_html(raw) if resp.status == 200 else ""
         if not about:

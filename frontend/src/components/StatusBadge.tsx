@@ -3,6 +3,7 @@ const STYLES = {
   notViewed: "bg-blue-100 text-blue-800 border-blue-300",
   applied: "bg-green-100 text-green-800 border-green-400",
   ignored: "bg-slate-200 text-slate-600 border-slate-400",
+  ignoredByTriage: "bg-slate-200 text-slate-600 border-slate-400",
   saved: "bg-violet-100 text-violet-800 border-violet-400",
 } as const;
 
@@ -11,6 +12,7 @@ const LABELS = {
   notViewed: "● NOVA",
   applied: "✅ APPLY CLICADO",
   ignored: "🚫 IGNORADA",
+  ignoredByTriage: "🚫 IGNORADA (triagem)",
   saved: "★ SALVA",
 } as const;
 

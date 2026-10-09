@@ -6,7 +6,7 @@ import type { TaskState } from "@/types/job";
 
 const POLL_MS = 1500;
 
-/** Starts (or resumes) a scan on the backend and polls its progress until it finishes. */
+/** Starts or resumes a background task (scan or triage) and polls its progress until it finishes. */
 export function useScanTask(onFinished: (task: TaskState) => void) {
   const [task, setTask] = useState<TaskState | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -76,5 +76,5 @@ export function useScanTask(onFinished: (task: TaskState) => void) {
     [],
   );
 
-  return { task, running: task?.status === "running", error, start, cancel, resumeIfRunning };
+  return { task, running: task?.status === "running", error, start, follow, cancel, resumeIfRunning };
 }

@@ -24,6 +24,18 @@ class Settings(BaseSettings):
     max_delay_s: float = 4.0
     max_range_hours: int = 24 * 30
 
+    # Triage ("Preparar triagem"): About fetches are paced slower than a scan
+    triage_min_delay_s: float = 4.0
+    triage_max_delay_s: float = 9.0
+    triage_batch_pause_min_s: float = 60.0
+    triage_batch_pause_max_s: float = 120.0
+    triage_max_per_run: int = 150  # About fetches per run; the next run continues where it stopped
+    triage_batch_size: int = 25  # jobs per file sent to the AI
+    triage_batch_max_chars: int = 100_000
+    triage_ignore_at_or_below: int = 59  # imported fit score <= this -> job is ignored
+    # Comma-separated companies always ignored by the triage (e.g. a former employer); set it in backend/.env
+    triage_blocked_companies: str = ""
+
     # Fallback search when the preferences "Show all" link cannot be found on /jobs/
     fallback_keywords: str = ""
     fallback_geo_id: str = ""
@@ -39,6 +51,10 @@ class Settings(BaseSettings):
     @property
     def debug_dir(self) -> Path:
         return self.data_dir / "debug"
+
+    @property
+    def triage_dir(self) -> Path:
+        return self.data_dir / "triage"
 
     @property
     def state_file(self) -> Path:

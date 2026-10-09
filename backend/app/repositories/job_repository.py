@@ -27,7 +27,15 @@ CREATE TABLE IF NOT EXISTS jobs (
     local_viewed_at   TEXT,
     apply_clicked_at  TEXT,
     ignored_at        TEXT,
-    saved_at          TEXT
+    saved_at          TEXT,
+    triage_score      INTEGER,
+    salary_min        INTEGER,
+    salary_ideal      INTEGER,
+    salary_max        INTEGER,
+    salary_currency   TEXT,
+    triage_summary    TEXT,
+    triaged_at        TEXT,
+    triage_action     TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_jobs_posted_at ON jobs(posted_at DESC);
 """
@@ -36,15 +44,34 @@ _COLUMNS = (
     "job_id", "title", "company", "location", "workplace_type", "posted_at", "posted_label",
     "job_url", "li_viewed", "li_applied", "about_html", "apply_url", "is_easy_apply",
     "found_at", "last_seen_at", "local_viewed_at", "apply_clicked_at", "ignored_at", "saved_at",
+    "triage_score", "salary_min", "salary_ideal", "salary_max", "salary_currency", "triage_summary",
+    "triaged_at", "triage_action",
 )
 _TIMESTAMP_COLUMNS = (
     "posted_at", "found_at", "last_seen_at", "local_viewed_at", "apply_clicked_at", "ignored_at", "saved_at",
+    "triaged_at",
+)
+# Fields written by update_fields (triage import / About prefetch); never touched by a scan
+_UPDATABLE_COLUMNS = (
+    "about_html", "ignored_at", "triage_score", "salary_min", "salary_ideal", "salary_max", "salary_currency",
+    "triage_summary", "triaged_at", "triage_action",
 )
 _USER_MARK_COLUMNS = ("local_viewed_at", "apply_clicked_at", "ignored_at", "saved_at")
 # Columns added after the first release, applied to older weekly files on open
 _MIGRATIONS = {
-    "ignored_at": "ALTER TABLE jobs ADD COLUMN ignored_at TEXT",
-    "saved_at": "ALTER TABLE jobs ADD COLUMN saved_at TEXT",
+    column: f"ALTER TABLE jobs ADD COLUMN {column} {sql_type}"
+    for column, sql_type in (
+        ("ignored_at", "TEXT"),
+        ("saved_at", "TEXT"),
+        ("triage_score", "INTEGER"),
+        ("salary_min", "INTEGER"),
+        ("salary_ideal", "INTEGER"),
+        ("salary_max", "INTEGER"),
+        ("salary_currency", "TEXT"),
+        ("triage_summary", "TEXT"),
+        ("triaged_at", "TEXT"),
+        ("triage_action", "TEXT"),
+    )
 }
 
 
@@ -134,6 +161,19 @@ class JobRepository:
             cur = conn.execute(
                 f"UPDATE jobs SET {column} = COALESCE({column}, ?) WHERE job_id = ?", (_dt(when), job_id)
             )
+            return cur.rowcount > 0
+
+    def update_fields(self, job_id: str, **fields) -> bool:
+        """Partial update of triage/About fields, leaving the rest of the row untouched."""
+        unknown = set(fields) - set(_UPDATABLE_COLUMNS)
+        if unknown:
+            raise ValueError(f"Not updatable: {sorted(unknown)}")
+        if not fields or not self.exists():
+            return False
+        values = [_dt(v) if isinstance(v, datetime) else v for v in fields.values()]
+        assignments = ", ".join(f"{column} = ?" for column in fields)
+        with self._connect() as conn:
+            cur = conn.execute(f"UPDATE jobs SET {assignments} WHERE job_id = ?", [*values, job_id])
             return cur.rowcount > 0
 
     def clear_timestamp(self, job_id: str, column: str) -> bool:
