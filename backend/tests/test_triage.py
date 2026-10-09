@@ -307,3 +307,20 @@ def test_prompt_without_blocked_companies(settings, memory):
     triage.prepare(settings, repo, noop_progress, client=FakeClient(), pacer=pacer(settings, FakeClock()))
     prompt = (triage.triage_folder(settings, WEEK) / triage.prompt_file_name(WEEK)).read_text(encoding="utf-8")
     assert "(nenhuma)" in prompt
+
+
+def test_prompt_salary_rules_and_minimum(settings, memory):
+    repo = seed(memory, WEEK, company_job("1", "Other"))
+    folder = triage.triage_folder(settings, WEEK)
+
+    with_min = settings.model_copy(update={"triage_min_salary": 12500})
+    triage.prepare(with_min, repo, noop_progress, client=FakeClient(), pacer=pacer(with_min, FakeClock()))
+    prompt = (folder / triage.prompt_file_name(WEEK)).read_text(encoding="utf-8")
+    assert "Meu salário mínimo é R$ 12.500" in prompt
+    assert "Glassdoor" in prompt and "Robert Half" in prompt
+    assert "A aderência NÃO considera salário" in prompt
+    assert "mesmo que fique abaixo" in prompt
+
+    triage.prepare(settings, repo, noop_progress, client=FakeClient(), pacer=pacer(settings, FakeClock()))
+    prompt = (folder / triage.prompt_file_name(WEEK)).read_text(encoding="utf-8")
+    assert "Meu salário mínimo é não informado" in prompt

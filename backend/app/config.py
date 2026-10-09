@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     triage_ignore_at_or_below: int = 59  # imported fit score <= this -> job is ignored
     # Comma-separated companies always ignored by the triage (e.g. a former employer); set it in backend/.env
     triage_blocked_companies: str = ""
+    # Your minimum monthly CLT salary (BRL), written in the AI instructions as context; set it in backend/.env
+    triage_min_salary: int | None = None
 
     # Fallback search when the preferences "Show all" link cannot be found on /jobs/
     fallback_keywords: str = ""

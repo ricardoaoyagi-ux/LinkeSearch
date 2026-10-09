@@ -128,6 +128,11 @@ def build_batches(jobs: list[Job], size: int, max_chars: int) -> list[list[dict]
 
 
 # --- files -----------------------------------------------------------------------------------
+def format_brl(value: int) -> str:
+    """12500 -> "R$ 12.500" """
+    return "R$ " + f"{value:,}".replace(",", ".")
+
+
 def render_prompt(settings: Settings, week: str, total_batches: int, total_jobs: int) -> str:
     custom = settings.triage_dir / "prompt_template.md"
     template = (custom if custom.exists() else DEFAULT_TEMPLATE).read_text(encoding="utf-8")
@@ -140,6 +145,7 @@ def render_prompt(settings: Settings, week: str, total_batches: int, total_jobs:
         "ARQUIVO_RESULTADO": result_file_name(week),
         "LIMIAR": str(settings.triage_ignore_at_or_below),
         "EMPRESAS_BLOQUEADAS": ", ".join(blocked_companies(settings)) or "(nenhuma)",
+        "SALARIO_MINIMO": format_brl(settings.triage_min_salary) if settings.triage_min_salary else "não informado",
     }
     for key, value in values.items():
         template = template.replace("{{" + key + "}}", value)
