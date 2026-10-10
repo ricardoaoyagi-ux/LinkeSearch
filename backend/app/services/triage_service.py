@@ -144,6 +144,7 @@ def render_prompt(settings: Settings, week: str, total_batches: int, total_jobs:
         "ULTIMO_LOTE": batch_file_name(week, total_batches),
         "ARQUIVO_RESULTADO": result_file_name(week),
         "LIMIAR": str(settings.triage_ignore_at_or_below),
+        "LIMIAR_PRETENSAO": str(settings.triage_skip_salary_at_or_below),
         "EMPRESAS_BLOQUEADAS": ", ".join(blocked_companies(settings)) or "(nenhuma)",
         "SALARIO_MINIMO": format_brl(settings.triage_min_salary) if settings.triage_min_salary else "não informado",
     }
@@ -414,6 +415,12 @@ def _money(value) -> int | None:
     return None
 
 
+def _salary(value) -> int | None:
+    """Salary from the AI; 0 means "not researched" (low fit score) and is stored as empty."""
+    amount = _money(value)
+    return amount or None
+
+
 def _short_text(value, limit: int) -> str | None:
     if value is None:
         return None
@@ -470,9 +477,9 @@ def import_results(settings: Settings, text: str, now: datetime | None = None) -
             report.blocked += 1
         fields: dict = {
             "triage_score": score,
-            "salary_min": _money(item.get("salario_min")),
-            "salary_ideal": _money(item.get("salario_ideal")),
-            "salary_max": _money(item.get("salario_max")),
+            "salary_min": _salary(item.get("salario_min")),
+            "salary_ideal": _salary(item.get("salario_ideal")),
+            "salary_max": _salary(item.get("salario_max")),
             "salary_currency": _short_text(item.get("moeda"), 8),
             "triage_summary": BLOCKED_SUMMARY if blocked else _short_text(item.get("resumo"), 1000),
             "triaged_at": now,

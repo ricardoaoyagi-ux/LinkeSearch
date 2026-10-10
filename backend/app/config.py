@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     triage_blocked_companies: str = ""
     # Your minimum monthly CLT salary (BRL), written in the AI instructions as context; set it in backend/.env
     triage_min_salary: int | None = None
+    # Fit score <= this: the AI skips the salary research and returns 0/0/0 (stored as "not researched")
+    triage_skip_salary_at_or_below: int = 59
 
     # Fallback search when the preferences "Show all" link cannot be found on /jobs/
     fallback_keywords: str = ""

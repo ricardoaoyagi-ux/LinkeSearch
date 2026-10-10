@@ -63,12 +63,19 @@ export function JobDetail({ job, loading, error, actionError, onApply, onToggleI
               </span>
               <span>
                 <span className="text-slate-500">Pretensão (CLT):</span>{" "}
-                <span className="font-medium">
-                  {formatMoney(job.salary_min, job.salary_currency)} /{" "}
-                  {formatMoney(job.salary_ideal, job.salary_currency)} /{" "}
-                  {formatMoney(job.salary_max, job.salary_currency)}
-                </span>{" "}
-                <span className="text-xs text-slate-400">(mín / ideal / máx)</span>
+                {job.salary_min === null && job.salary_ideal === null && job.salary_max === null ? (
+                  // The AI skips the salary research for low fit scores
+                  <span className="text-slate-500 italic">não pesquisada (aderência baixa)</span>
+                ) : (
+                  <>
+                    <span className="font-medium">
+                      {formatMoney(job.salary_min, job.salary_currency)} /{" "}
+                      {formatMoney(job.salary_ideal, job.salary_currency)} /{" "}
+                      {formatMoney(job.salary_max, job.salary_currency)}
+                    </span>{" "}
+                    <span className="text-xs text-slate-400">(mín / ideal / máx)</span>
+                  </>
+                )}
               </span>
             </div>
             {job.triage_summary && <p className="mt-1 text-slate-600">{job.triage_summary}</p>}

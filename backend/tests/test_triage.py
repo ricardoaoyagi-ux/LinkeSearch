@@ -324,3 +324,17 @@ def test_prompt_salary_rules_and_minimum(settings, memory):
     triage.prepare(settings, repo, noop_progress, client=FakeClient(), pacer=pacer(settings, FakeClock()))
     prompt = (folder / triage.prompt_file_name(WEEK)).read_text(encoding="utf-8")
     assert "Meu salário mínimo é não informado" in prompt
+
+
+def test_low_fit_skips_salary_research(settings, memory):
+    repo = seed(memory, WEEK, company_job("1", "Other"), company_job("2", "Other2"))
+    triage.prepare(settings, repo, noop_progress, client=FakeClient(), pacer=pacer(settings, FakeClock()))
+    prompt = (triage.triage_folder(settings, WEEK) / triage.prompt_file_name(WEEK)).read_text(encoding="utf-8")
+    assert "Se ela for 59 ou menos, NÃO pesquise salário" in prompt and "{{" not in prompt
+
+    low = {"job_id": "1", "aderencia": 40, "salario_min": 0, "salario_ideal": 0, "salario_max": 0, "resumo": "fraca"}
+    triage.import_results(settings, result_text(low, item("2", 75)), NOW)
+    skipped = repo.get("1")
+    assert (skipped.salary_min, skipped.salary_ideal, skipped.salary_max) == (None, None, None)
+    assert skipped.triage_score == 40 and skipped.ignored_at is not None
+    assert repo.get("2").salary_ideal == 18000
