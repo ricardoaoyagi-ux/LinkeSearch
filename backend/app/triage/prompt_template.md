@@ -2,6 +2,16 @@
 
 Você vai me ajudar a fazer a **triagem de vagas de emprego** comparando cada vaga com o meu perfil profissional, descrito no **arquivo mestre de competências** que está anexado nesta conversa (ou nos arquivos deste Projeto). Use **somente** o arquivo mestre como fonte sobre mim.
 
+## Antes de qualquer lote: confirme o arquivo mestre
+
+Eu tenho **mais de uma versão** do arquivo mestre (ex.: 3 versões). Antes de pedir o primeiro lote:
+
+1. **Liste todos** os arquivos que podem ser o arquivo mestre (anexados nesta conversa ou nos arquivos do Projeto), com o **nome** e a **data/versão** que aparecem no nome ou no conteúdo.
+2. Diga **qual você vai usar** — deve ser a versão **mais recente/atualizada** — e **por quê** (data, número de versão, experiência mais recente descrita).
+3. **Prove que leu** o arquivo escolhido citando 2 ou 3 informações dele (ex.: cargo atual ou mais recente, última empresa e período, principais tecnologias).
+4. Se não encontrar nenhum arquivo mestre, ou se não der para saber com segurança qual é o mais recente, **pergunte** — não presuma.
+5. **Aguarde a minha confirmação.** Só depois que eu confirmar, peça o primeiro lote. Use **apenas** a versão confirmada durante toda a triagem.
+
 ## O que vou enviar
 
 - **{{TOTAL_LOTES}} arquivos de lote**, com **{{TOTAL_VAGAS}} vagas no total**, da semana de {{SEMANA_LEGIVEL}}.
@@ -71,4 +81,4 @@ Regras:
 2. Se faltar alguma vaga, liste os `job_id` que faltam e avalie-os antes de finalizar.
 3. Disponibilize o arquivo `{{ARQUIVO_RESULTADO}}` para download.
 
-Se entendeu, responda apenas: **"Pronto. Pode enviar o {{PRIMEIRO_LOTE}}."**
+Se entendeu, **não** peça o lote ainda: responda primeiro com a confirmação do arquivo mestre (seção "Antes de qualquer lote") e aguarde. Depois que eu confirmar o arquivo, responda apenas: **"Pronto. Pode enviar o {{PRIMEIRO_LOTE}}."**

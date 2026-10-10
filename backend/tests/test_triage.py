@@ -338,3 +338,13 @@ def test_low_fit_skips_salary_research(settings, memory):
     assert (skipped.salary_min, skipped.salary_ideal, skipped.salary_max) == (None, None, None)
     assert skipped.triage_score == 40 and skipped.ignored_at is not None
     assert repo.get("2").salary_ideal == 18000
+
+
+def test_prompt_asks_to_confirm_master_file_first(settings, memory):
+    repo = seed(memory, WEEK, company_job("1", "Other"))
+    triage.prepare(settings, repo, noop_progress, client=FakeClient(), pacer=pacer(settings, FakeClock()))
+    prompt = (triage.triage_folder(settings, WEEK) / triage.prompt_file_name(WEEK)).read_text(encoding="utf-8")
+    confirm = prompt.index("Antes de qualquer lote: confirme o arquivo mestre")
+    assert confirm < prompt.index("## O que vou enviar")  # right after the introduction
+    assert "mais recente/atualizada" in prompt and "Aguarde a minha confirmação" in prompt
+    assert "**não** peça o lote ainda" in prompt
