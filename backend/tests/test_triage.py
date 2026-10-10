@@ -350,8 +350,19 @@ def test_prompt_asks_to_confirm_master_file_first(settings, memory):
     assert "**não** peça o lote ainda" in prompt
 
 
-def test_long_summary_is_not_cut_short(settings, memory):
-    repo = seed(memory, WEEK, job("1"))
-    long_summary = "Aderência e salário com fontes https://www.glassdoor.com.br/x " * 40  # ~2.500 chars
-    triage.import_results(settings, result_text(item("1", 80, resumo=long_summary)), NOW)
-    assert repo.get("1").triage_summary == long_summary.strip()
+def test_overlong_summary_is_cut_with_ellipsis(settings, memory):
+    repo = seed(memory, WEEK, job("1"), job("2"))
+    short = "Forte em liderança técnica Java; gap: exige inglês fluente."
+    rambling = "Aderência longa demais com fontes https://www.glassdoor.com.br/x " * 40  # ~2.600 chars
+    triage.import_results(settings, result_text(item("1", 80, resumo=short), item("2", 80, resumo=rambling)), NOW)
+    assert repo.get("1").triage_summary == short
+    cut = repo.get("2").triage_summary
+    assert len(cut) == triage.SUMMARY_MAX_CHARS and cut.endswith("…")
+
+
+def test_prompt_summary_is_fit_only(settings, memory):
+    repo = seed(memory, WEEK, job("1", about="<p>x</p>"))
+    triage.prepare(settings, repo, noop_progress, client=FakeClient(), pacer=pacer(settings, FakeClock()))
+    prompt = (triage.triage_folder(settings, WEEK) / triage.prompt_file_name(WEEK)).read_text(encoding="utf-8")
+    assert "somente a justificativa da aderência" in prompt and "Não fale de salário" in prompt
+    assert "vai escrita no `resumo`" not in prompt and "no `resumo`, aponte" not in prompt

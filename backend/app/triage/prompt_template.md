@@ -29,17 +29,15 @@ Eu tenho **mais de uma versão** do arquivo mestre (ex.: 3 versões). Antes de p
    - **A aderência NÃO considera salário**: nem a faixa salarial da vaga nem o meu salário mínimo podem aumentar ou diminuir a nota.
    Seja criterioso: **{{LIMIAR}} ou menos significa que eu não deveria me candidatar** (essas vagas serão descartadas automaticamente).
 2. **`salario_min`, `salario_ideal`, `salario_max`** — minha **pretensão de salário-base** para esta vaga, em valor **mensal bruto**, moeda **BRL**, como números inteiros (sem pontos, vírgulas ou símbolos). Baseie-se no cargo, na senioridade, na empresa/porte, na localização e no meu perfil.
-   - **Primeiro calcule a aderência. Se ela for {{LIMIAR_PRETENSAO}} ou menos, NÃO pesquise salário:** devolva `salario_min`, `salario_ideal` e `salario_max` iguais a **0** e escreva no `resumo` apenas a parte de aderência. As regras abaixo valem só para as vagas acima desse limite.
-   - **Fontes:** consulte o **Glassdoor**, priorizando a **mesma empresa e o mesmo cargo**; cruze com o guia salarial da **Robert Half** e com outras referências disponíveis (pesquisas de mercado, outros sites de salários). Se não conseguir acessar alguma fonte, diga isso no `resumo` em vez de estimar como se tivesse acessado.
-   - **Salário-base × remuneração total:** os campos `salario_*` são **somente o salário-base**. A remuneração total (base + bônus/PLR e variáveis, em valor mensal) vai escrita no `resumo`.
-   - **Qualidade dos dados:** no `resumo`, aponte dados antigos (informe o ano), amostras pequenas e inconsistências entre as fontes.
+   - **Primeiro calcule a aderência. Se ela for {{LIMIAR_PRETENSAO}} ou menos, NÃO pesquise salário:** devolva `salario_min`, `salario_ideal` e `salario_max` iguais a **0**. As regras abaixo valem só para as vagas acima desse limite.
+   - **Fontes:** consulte o **Glassdoor**, priorizando a **mesma empresa e o mesmo cargo**; cruze com o guia salarial da **Robert Half** e com outras referências disponíveis (pesquisas de mercado, outros sites de salários). Use as fontes como base para definir a faixa — **não** escreva fontes nem links na resposta.
+   - **Salário-base × remuneração total:** os campos `salario_*` são **somente o salário-base** — não some bônus, PLR nem variáveis.
+   - **Qualidade dos dados:** ao definir a faixa, dê mais peso a dados recentes e a amostras maiores, e desconfie de valores isolados ou inconsistentes entre as fontes.
    - **Meu salário mínimo é {{SALARIO_MINIMO}}** (CLT mensal). Use apenas como contexto. **Nunca** use esse valor automaticamente como `salario_min`: informe a faixa estimada real da vaga, **mesmo que fique abaixo** do meu mínimo.
    - **Regra fixa: a pretensão é SEMPRE em regime CLT**, mesmo que a vaga seja PJ, cooperado ou outro regime. **Não** converta para PJ — eu mesmo faço a conversão na hora de me candidatar.
    - Se a vaga informar uma faixa salarial em PJ (ou em outra moeda/período), use-a apenas como referência e devolva o **equivalente CLT mensal em BRL**.
 3. **`moeda`** — sempre `"BRL"`.
-4. **`resumo`** — texto curto, nesta ordem (para aderência {{LIMIAR_PRETENSAO}} ou menos, só o primeiro item):
-   - **Aderência:** 1 a 2 frases com o principal motivo da nota (o que mais combina e o que mais pesa contra);
-   - **Salário:** remuneração total estimada (base + variáveis, mensal), fontes usadas e alertas (dados antigos, amostras pequenas, inconsistências, fontes que não foi possível acessar).
+4. **`resumo`** — **somente a justificativa da aderência**, em **1 a 2 frases curtas (no máximo ~300 caracteres)**: os principais **pontos fortes** e os principais **gaps** da vaga em relação ao meu perfil. **Não fale de salário** no resumo (nem faixa, nem fontes, nem links).
 
 ## Empresas a ignorar
 

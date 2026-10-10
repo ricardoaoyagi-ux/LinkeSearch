@@ -31,8 +31,8 @@ NL = chr(10)
 DEFAULT_TEMPLATE = Path(__file__).resolve().parents[1] / "triage" / "prompt_template.md"
 MANIFEST_NAME = "manifest.json"
 TRIAGE_ACTION_IGNORED = "ignored"
-# The AI summary covers fit + salary sources and warnings (with links), so it can be long
-SUMMARY_MAX_CHARS = 5000
+# The prompt asks for ~300 characters; this only protects against an AI that ignores it
+SUMMARY_MAX_CHARS = 1000
 # Average seconds one About request takes besides the pause (used only for the time estimate)
 _REQUEST_SECONDS = 1.5
 
@@ -430,6 +430,14 @@ def _short_text(value, limit: int) -> str | None:
     return text[:limit] or None
 
 
+def _summary(value) -> str | None:
+    """AI fit justification; an over-long one is cut with an ellipsis so the cut is visible."""
+    text = _short_text(value, len(str(value or "")))
+    if text and len(text) > SUMMARY_MAX_CHARS:
+        text = text[: SUMMARY_MAX_CHARS - 1].rstrip() + "…"
+    return text
+
+
 def _has_manual_mark(job: Job) -> bool:
     manually_ignored = job.ignored_at is not None and job.triage_action != TRIAGE_ACTION_IGNORED
     return job.saved_at is not None or job.apply_clicked_at is not None or manually_ignored
@@ -483,7 +491,7 @@ def import_results(settings: Settings, text: str, now: datetime | None = None) -
             "salary_ideal": _salary(item.get("salario_ideal")),
             "salary_max": _salary(item.get("salario_max")),
             "salary_currency": _short_text(item.get("moeda"), 8),
-            "triage_summary": BLOCKED_SUMMARY if blocked else _short_text(item.get("resumo"), SUMMARY_MAX_CHARS),
+            "triage_summary": BLOCKED_SUMMARY if blocked else _summary(item.get("resumo")),
             "triaged_at": now,
         }
         if _has_manual_mark(job):
