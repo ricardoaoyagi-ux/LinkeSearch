@@ -1,7 +1,7 @@
 "use client";
 
 import DOMPurify from "dompurify";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { Job } from "@/types/job";
 import { formatDateTime, formatMoney, isApplied, isViewed, relativeTime, safeUrl } from "@/lib/jobStatus";
 import { ScoreBadge } from "./ScoreBadge";
@@ -24,6 +24,8 @@ const BUTTON = "inline-flex items-center whitespace-nowrap rounded-full border p
 const ALLOWED_TAGS = ["p", "br", "ul", "ol", "li", "strong", "b", "em", "i", "u", "h3", "h4", "div"];
 
 export function JobDetail({ job, loading, error, actionError, onApply, onToggleIgnore, onToggleSave }: Props) {
+  // Kept while browsing the list: once minimized, the next jobs open minimized too
+  const [summaryCollapsed, setSummaryCollapsed] = useState(false);
   const aboutHtml = useMemo(
     () => (job?.about_html ? DOMPurify.sanitize(job.about_html, { ALLOWED_TAGS, ALLOWED_ATTR: [] }) : ""),
     [job?.about_html],
@@ -77,8 +79,20 @@ export function JobDetail({ job, loading, error, actionError, onApply, onToggleI
                   </>
                 )}
               </span>
+              {job.triage_summary && (
+                <button
+                  type="button"
+                  onClick={() => setSummaryCollapsed((collapsed) => !collapsed)}
+                  title={summaryCollapsed ? "Expandir o resumo da triagem" : "Minimizar o resumo da triagem"}
+                  aria-label={summaryCollapsed ? "Expandir o resumo da triagem" : "Minimizar o resumo da triagem"}
+                  aria-expanded={!summaryCollapsed}
+                  className="ml-auto flex h-5 w-5 items-center justify-center rounded border border-slate-300 text-sm leading-none text-slate-500 hover:bg-slate-100"
+                >
+                  {summaryCollapsed ? "+" : "−"}
+                </button>
+              )}
             </div>
-            {job.triage_summary && <p className="mt-1 text-slate-600">{job.triage_summary}</p>}
+            {job.triage_summary && !summaryCollapsed && <p className="mt-1 text-slate-600">{job.triage_summary}</p>}
           </div>
         )}
 

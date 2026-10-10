@@ -31,6 +31,8 @@ NL = chr(10)
 DEFAULT_TEMPLATE = Path(__file__).resolve().parents[1] / "triage" / "prompt_template.md"
 MANIFEST_NAME = "manifest.json"
 TRIAGE_ACTION_IGNORED = "ignored"
+# The AI summary covers fit + salary sources and warnings (with links), so it can be long
+SUMMARY_MAX_CHARS = 5000
 # Average seconds one About request takes besides the pause (used only for the time estimate)
 _REQUEST_SECONDS = 1.5
 
@@ -481,7 +483,7 @@ def import_results(settings: Settings, text: str, now: datetime | None = None) -
             "salary_ideal": _salary(item.get("salario_ideal")),
             "salary_max": _salary(item.get("salario_max")),
             "salary_currency": _short_text(item.get("moeda"), 8),
-            "triage_summary": BLOCKED_SUMMARY if blocked else _short_text(item.get("resumo"), 1000),
+            "triage_summary": BLOCKED_SUMMARY if blocked else _short_text(item.get("resumo"), SUMMARY_MAX_CHARS),
             "triaged_at": now,
         }
         if _has_manual_mark(job):

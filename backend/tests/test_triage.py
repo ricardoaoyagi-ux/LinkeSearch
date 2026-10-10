@@ -348,3 +348,10 @@ def test_prompt_asks_to_confirm_master_file_first(settings, memory):
     assert confirm < prompt.index("## O que vou enviar")  # right after the introduction
     assert "mais recente/atualizada" in prompt and "Aguarde a minha confirmação" in prompt
     assert "**não** peça o lote ainda" in prompt
+
+
+def test_long_summary_is_not_cut_short(settings, memory):
+    repo = seed(memory, WEEK, job("1"))
+    long_summary = "Aderência e salário com fontes https://www.glassdoor.com.br/x " * 40  # ~2.500 chars
+    triage.import_results(settings, result_text(item("1", 80, resumo=long_summary)), NOW)
+    assert repo.get("1").triage_summary == long_summary.strip()
